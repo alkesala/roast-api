@@ -3,22 +3,28 @@ import (
     "context"
     "log"
     "os"
-    "github.com/jackc/pgx/v5"
+    "github.com/jackc/pgx/v5/pgxpool"
+"fmt"
 )
 
-func Connect() (*pgx.Conn, error) {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+func Connect() (*pgxpool.Pool, error) {
+    dbURL := os.Getenv("DATABASE_URL")
+    if dbURL == "" {
+        return nil, fmt.Errorf("DATABASE_URL environment variable is not set")
+    }
+
+    log.Println("Attempting to connect to database...")
+    pool, err := pgxpool.New(context.Background(), dbURL)
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("pgxpool.New failed: %w", err)
     }
 
     // Test connection
-    var version string
-    if err := conn.QueryRow(context.Background(), "SELECT version()").Scan(&version); err != nil {
-        conn.Close(context.Background())
-        return nil, err
+    if err := pool.Ping(context.Background()); err != nil {
+        pool.Close()
+        return nil, fmt.Errorf("ping failed: %w", err)
     }
 
-    log.Println(" Connected to:", version)
-    return conn, nil
+    log.Println(" Database pool connected successfully")
+    return pool, nil
 }

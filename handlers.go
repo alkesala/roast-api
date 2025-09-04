@@ -6,11 +6,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 
-func handleRoast (w http.ResponseWriter, r *http.Request, db *pgx.Conn) {
+func handleRoast(w http.ResponseWriter, r *http.Request, db *pgxpool.Pool) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var roast string

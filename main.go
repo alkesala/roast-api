@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +15,7 @@ func main () {
 	if err != nil {
 		log.Fatal("failed to connect db", err)
 	}
-		defer database.Close(context.Background())
+		defer database.Close()
 
 	// port config, fallbacks into 8080 when local development.
 	// deployment server handles the PORT
