@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func Connect() (*pgxpool.Pool, error) {
-	dbURL := os.Getenv("DATABASE_URL")
+	dbURL := Load().Database
 	if dbURL == "" {
 		return nil, fmt.Errorf("DATABASE_URL environment variable is not set")
 	}

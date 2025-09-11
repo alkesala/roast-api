@@ -3,14 +3,15 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Env file not found")
+	config := Load()
+	if config.Port == "" {
+		log.Fatal("Could not load PORT")
+	}
+	if config.Database == "" {
+		log.Fatal("Could not load Database config")
 	}
 	database, err := Connect()
 	if err != nil {
@@ -18,18 +19,11 @@ func main() {
 	}
 	defer database.Close()
 
-	// port config, fallbacks into 8080 when local development.
-	// deployment server handles the PORT
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8081"
-	}
-
 	http.HandleFunc("/api/roasts", func(w http.ResponseWriter, r *http.Request) {
 		handleRoast(w, r, database)
 
 	})
 
-	log.Printf("server starting on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Printf("server starting on port %s", config.Port)
+	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }
