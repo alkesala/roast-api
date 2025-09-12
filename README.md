@@ -55,7 +55,7 @@ DATABASE_URL=postgresql://username:password@host:port/database
 4. Create a `.env` file with your database configuration
 5. Run the application:
    ```bash
-   go run .
+   make run
    ```
 
 The API will be available at `http://localhost:8080`
@@ -64,8 +64,15 @@ The API will be available at `http://localhost:8080`
 
 To build the binary:
 ```bash
-go build -o roast-api .
+make build
 ```
+
+## Available Make Commands
+
+- `make build` - Build the application binary
+- `make run` - Build and run the application
+- `make clean` - Remove build artifacts
+- `make help` - Show all available commands
 
 ## Deployment
 
