@@ -12,14 +12,30 @@ import (
 )
 
 type RoastResponse struct {
-	Roast string `json:"roast"`
+	Roast string `json:"roast" example:"Your code is so bad, even your comments are confused"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error" example:"No roasts found"`
+}
+
+// GetRoast godoc
+// @Summary Get a random roast
+// @Description Returns a random roast from the database
+// @Tags roasts
+// @Produce json
+// @Success 200 {object} RoastResponse "Successfully retrieved roast"
+// @Failure 404 {object} ErrorResponse "No roasts found in database"
+// @Failure 405 {object} ErrorResponse "Method not allowed"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /roasts [get]
 func handleRoast(w http.ResponseWriter, r *http.Request, db *pgxpool.Pool) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
+
 	log.Printf("Roast request from: %s", r.RemoteAddr)
+
 	if r.Method != http.MethodGet {
 		http.Error(w, `{"error": "Method not allowed"}`, http.StatusMethodNotAllowed)
 		return
@@ -27,25 +43,30 @@ func handleRoast(w http.ResponseWriter, r *http.Request, db *pgxpool.Pool) {
 
 	var roast string
 	query := "SELECT content FROM roasts ORDER BY RANDOM() LIMIT 1"
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	err := db.QueryRow(ctx, query).Scan(&roast)
 	if err == pgx.ErrNoRows {
 		http.Error(w, `{"error": "No roasts found"}`, http.StatusNotFound)
+		return
 	}
-
 	if err != nil {
 		log.Printf("db query failed: %v", err)
 		http.Error(w, `{"error": "Failed to fetch roast"}`, http.StatusInternalServerError)
 		return
 	}
+
 	response := RoastResponse{Roast: roast}
-	w.WriteHeader(http.StatusOK)
+
 	jsonData, err := json.Marshal(response)
 	if err != nil {
 		http.Error(w, `{"error": "Failed to encode json"}`, http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write(jsonData); err != nil {
 		log.Printf("Failed to write the Roast %v", err)
 		return

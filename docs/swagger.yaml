@@ -1,0 +1,53 @@
+basePath: /api/v1
+definitions:
+  main.ErrorResponse:
+    properties:
+      error:
+        example: No roasts found
+        type: string
+    type: object
+  main.RoastResponse:
+    properties:
+      roast:
+        example: Your code is so bad, even your comments are confused
+        type: string
+    type: object
+host: roast-api.fly.dev
+info:
+  contact:
+    email: your@email.com
+    name: API Support
+  description: A simple API that serves random roasts
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Roast API
+  version: "1.0"
+paths:
+  /roasts:
+    get:
+      description: Returns a random roast from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved roast
+          schema:
+            $ref: '#/definitions/main.RoastResponse'
+        "404":
+          description: No roasts found in database
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "405":
+          description: Method not allowed
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get a random roast
+      tags:
+      - roasts
+swagger: "2.0"
